@@ -25,7 +25,6 @@ CREATE TABLE `dim_lugar`(
 
 DROP TABLE IF EXISTS `dim_festivo`;
 CREATE TABLE `dim_festivo`(
-    `key_festivo` int(10) NOT NULL,
     `key_lugar` int(10) NOT NULL,
     `key_fecha` int(10) NOT NULL,
     `festivo` boolean,
