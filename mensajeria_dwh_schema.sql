@@ -5,8 +5,15 @@ CREATE TABLE `dim_lugar`(
     `Pais` VARCHAR(50),
     `Ciudad` VARCHAR(30),
     `Direccion` VARCHAR(30),
-    `MediosAcceso` VARCHAR(30),
-    `Clima` VARCHAR(30) CHECK (Clima in ('Atlantico','Mediterraneo','Montaña','Interior', 'Tundra', 'Desertico')),
+    `AccesoMar` BOOLEAN,
+    `AccesoTierra` BOOLEAN,
+    `ClimaAtlantico` BOOLEAN,
+    `ClimaMediterraneo` BOOLEAN,
+    `ClimaMontanha` BOOLEAN,
+    `ClimaInterior` BOOLEAN,
+    `ClimaTundra` BOOLEAN,
+    `ClimaDesertico` BOOLEAN,
+    `AccesoAereo` BOOLEAN,
     `Poblacion` INTEGER,
     `Costero` BOOLEAN,
     `Industrial` BOOLEAN,
@@ -16,33 +23,47 @@ CREATE TABLE `dim_lugar`(
     PRIMARY KEY (`key_lugar`)
 );
 
-DROP TABLE IF EXISTS `dim_tiempo`;
-CREATE TABLE `dim_tiempo`(
-    `key_tiempo` int(10) NOT NULL AUTO_INCREMENT,
-    `ID_Pedido` VARCHAR(20) NOT NULL,
-    `DiaEntrega` int(10),
-    `MesEntrega` int(10),
-    `AnhoEntrega` int(10),
-    `HoraEntrega` VARCHAR(10),
-    `DiaPedido` INTEGER,
-    `MesPedido` INTEGER,
-    `AnhoPedido` INTEGER,
-    `HoraPedido` VARCHAR(10),
-    `Festivo` BOOLEAN,
-    `DiaSemana` VARCHAR(10),
-    `VisperaFestivo` BOOLEAN,
-    `Estacion` VARCHAR(10),
-    `tiempo_last_update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-    PRIMARY KEY (`key_tiempo`)
+DROP TABLE IF EXISTS `dim_festivo`;
+CREATE TABLE `dim_festivo`(
+    `key_festivo` int(10) NOT NULL,
+    `key_lugar` int(10) NOT NULL,
+    `key_fecha` int(10) NOT NULL,
+    `festivo` boolean,
+    `festivo_last_update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+    PRIMARY KEY (`key_festivo`)
 );
+
+DROP TABLE IF EXISTS `dim_fecha`;
+CREATE TABLE `dim_fecha`(
+    `key_fecha` int(10) NOT NULL,
+    `ID_Pedido` VARCHAR(20) NOT NULL,
+    `Dia` int(10),
+    `Mes` int(10),
+    `Anho` int(10),
+    `DiaSemana` VARCHAR(10),
+    `Estacion` VARCHAR(10),
+    `fecha_last_update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+    PRIMARY KEY (`key_fecha`)
+);
+
+DROP TABLE IF EXISTS `dim_hora`;
+CREATE TABLE `dim_hora`(
+    `key_hora` int(10) NOT NULL,
+    `ID_Pedido` VARCHAR(20) NOT NULL,
+    `hora` int(2),
+    `hora_last_update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+    PRIMARY KEY (`key_hora`)
+);
+
 
 DROP TABLE IF EXISTS `dim_devolucion`;
 CREATE TABLE `dim_devolucion`(
     `key_devolucion` int(10) NOT NULL AUTO_INCREMENT,
     `ID_Devolucion` VARCHAR(20) NOT NULL,
     `devolucion_last_update` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-    `Motivo` VARCHAR(30)
-    CHECK ( Motivo IN ('Paquete danhado','No es lo que pedi','Ya no lo necesito')),
+    `MotivoDanhado` BOOLEAN,
+    `MotivoNoPedi` BOOLEAN,
+    `MotivoNoNecesito` BOOLEAN,
     PRIMARY KEY (`key_devolucion`)
 );
 
@@ -99,13 +120,17 @@ CREATE TABLE `fact_pedido`(
     `TiempoEntrega` VARCHAR(10),
     `key_cliente` int(10) NOT NULL,
     `key_lugar` int(10) NOT NULL,
-    `key_tiempo` int(10) NOT NULL,
     `key_devolucion` int(10) NOT NULL,
     `key_empleado` int(10) NOT NULL,
+    `key_festivo` int(10) NOT NULL,
+    `key_hora` int(10) NOT NULL,
+    `key_fecha` int(10) NOT NULL,
     PRIMARY KEY (`key_pedido`),
     KEY `dim_cliente_fact_pedido_fk` (`key_cliente`),
-    KEY `dim_tiempo_fact_pedido_fk` (`key_tiempo`),
     KEY `dim_lugar_fact_pedido_fk` (`key_lugar`),
     KEY `dim_empleado_fact_pedido_fk` (`key_empleado`),
+    KEY `dim_festivo_fact_pedido_fk` (`key_festivo`),
+    KEY `dim_hora_fact_pedido_fk` (`key_hora`),
+    KEY `dim_fecha_fact_pedido_fk` (`key_fecha`),
     KEY `dim_devolucion_fact_pedido_fk` (`key_devolucion`)
 );
